@@ -1,0 +1,39 @@
+==  Introduction
+
+Project truncates the task-status table.  This is to demonstrate an app that can repair an issue in a workflow.
+
+== Build the project
+
+=== To build the demo project
+
+```
+./mvnw clean package
+```
+
+=== Creating Docker Image
+In the case you are using this example to see how to dockerize your batch app:
+
+```
+mvn spring-boot:build-image -Dspring-boot.build-image.imageName=cppwfs/workflowfix:latest
+```
+
+=== Launching the App
+Set the following environment variables
+```
+export spring_datasource_url=j<Your DB>
+export spring_datasource_username=<Your user name>
+export spring_datasource_password=<Your password>
+export spring_datasource_driverClassName=<Your Driver>
+export spring_cloud_task_closecontextEnabled=true
+export spring_application_name=workflowfix
+```
+
+Launch the App
+```
+java -jar target/workflowfix-0.0.1-SNAPSHOT.jar
+```
+
+
+== DDL for test table
+CREATE TABLE task_status (issue varchar(10))
+insert into task_status (issue) values ('true');

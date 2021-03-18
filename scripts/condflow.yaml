@@ -1,0 +1,64 @@
+---
+apiVersion: "argoproj.io/v1alpha1"
+kind: "Workflow"
+metadata:
+  generateName: "batchapp-exec-"
+spec:
+  entrypoint: "ajug-workflow"
+  templates:
+  - name: "ajug-workflow"
+    dag:
+      tasks:
+      - name: batch-run-start
+        template: batch-run
+  - name: batch-run
+    steps:
+    - - name: batchapp
+        template: batchtestapp
+        continueOn:
+          failed: true
+    - - name: fix-failed-batch-app
+        template: fix-failed-batch-app
+        when: "{{steps.batchapp.exitCode}} == 2"
+  - name: fix-failed-batch-app
+    steps:
+    - - name: fix-tables
+        template: workflowfix
+    - - name: batch-retry
+        template: batch-run 
+  - name: "workflowfix"
+    container:
+      args: 
+      - --management.metrics.export.prometheus.enabled=true
+      - --spring.datasource.driverClassName=org.mariadb.jdbc.Driver
+      - --management.metrics.tags.application=${task.name:unknown}-${task.execution.id:unknown}
+      - --spring.cloud.task.closecontextEnabled=true
+      - --spring.cloud.task.name=workflowfix
+      - --spring.datasource.password=yourpassword
+      - --management.metrics.tags.service=task-application
+      - --spring.datasource.username=root
+      - --spring.datasource.url=jdbc:mysql://10.105.199.131:3306/mysql
+      - --management.metrics.export.prometheus.rsocket.port=7001
+      - --management.metrics.export.prometheus.rsocket.enabled=true
+      - --management.metrics.export.prometheus.rsocket.host=prometheus-proxy
+      image: "cppwfs/workflowfix"
+      imagePullPolicy: Never
+  - name: "batchtestapp"
+    container:
+      args: 
+      - --management.metrics.export.prometheus.enabled=true
+      - --spring.datasource.driverClassName=org.mariadb.jdbc.Driver
+      - --management.metrics.tags.application=${task.name:unknown}-${task.execution.id:unknown}
+      - --spring.cloud.task.batch.failOnJobFailure=true
+      - --spring.cloud.task.closecontextEnabled=true
+      - --spring.cloud.task.name=testbatchapp
+      - --spring.datasource.password=yourpassword
+      - --management.metrics.tags.service=task-application
+      - --timestamp.format=YYYY
+      - --spring.datasource.username=root
+      - --spring.datasource.url=jdbc:mysql://10.105.199.131:3306/mysql
+      - --management.metrics.export.prometheus.rsocket.port=7001
+      - --management.metrics.export.prometheus.rsocket.enabled=true
+      - --management.metrics.export.prometheus.rsocket.host=prometheus-proxy
+      image: "cppwfs/batchtestapp"
+      imagePullPolicy: Never

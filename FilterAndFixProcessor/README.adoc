@@ -1,0 +1,15 @@
+==  Introduction
+
+This project is a processor that filters out success and start messages from Spring Cloud Task.
+However, if it receives a task execution with an exit code of 2 it will cleanse the task_status table and send a task launch request to a rabbit exchange.
+
+=== To build the demo project
+
+```
+./mvnw clean package
+```
+
+== DDL to create a stream via Spring Cloud Data Flow
+```
+:task-events > FilterAndFix --spring.datasource.url=<your DB> --spring.datasource.username=<your user> --spring.datasource.password=<your password> --spring.datasource.driverClassName=<your db driver> | tasklauncher
+```

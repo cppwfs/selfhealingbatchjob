@@ -1,0 +1,16 @@
+= Self Healing Batch Jobs
+
+Your batch app crashed two hours into its three-hour run. Now you may have to do some cleanup and then restart it. Do you really have to do this, or can tools do this for me?
+
+In this talk, we show how you can use Spring Batch and workflow engines to rescue a failed batch execution.
+
+This discussion includes examples of how you can use Spring Cloud Data Flow Argo along with Spring Batch to reset and restart an execution without human intervention.
+
+
+This project contains the samples I used in the presentation and a PDF of the presentation slides.
+
+* batch-testapp - Contains the project that has the batch app showing Spring batches ability to restart a failed batch.
+* FilterAndFixProcessor - Contains the project that has a Stream processor that will attempt to resolve the problem that causes  batch-testapp  to fail
+* workflowfix - Contains the project that is used to resolve the batch-testapp's problem using the Argo workflow
+* scripts - Contains the argo workflow yaml file
+
